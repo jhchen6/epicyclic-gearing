@@ -1,0 +1,35 @@
+body {
+    width: 960px;
+    height: 500px;
+    position: relative;
+}
+
+svg {
+    border: 1px solid lightgrey;
+}
+
+form {
+    position: absolute;
+    top: 5em;
+    left: 1em;
+}
+
+path {
+    stroke: black;
+    stroke-width: 1px;
+    fill-rule: evenodd;
+}
+
+  .sun path {
+    fill: #6baed6;
+  }
+  
+  .planet path {
+    fill: #9ecae1;
+  }
+  
+  .annulus path {
+    fill: #c6dbef;
+  }
+  
+  
