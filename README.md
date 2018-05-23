@@ -13,4 +13,4 @@ https://bl.ocks.org/mbostock/1353700
 
 coordinate the gears
 
-now it appeares coordinated just by chance. change the number of planets or other parameters like toothHeight, and you'll see them overlapping. 
+now they appear coordinated just by chance. change the number of planets or other parameters like toothHeight, and you'll see them overlapping. 
