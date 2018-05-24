@@ -101,22 +101,26 @@ function gearPath(n, centerRadius, orientation) {
     var radius = n * toothWidth / Math.PI,
         angle = 0,
         anglePiece = Math.PI / n,
-        path = "M " + radius * Math.cos(angle) + " " + radius * Math.sin(angle);
+        halfToothW = toothWidth / 2,
+        halfAngleP = anglePiece / 2,
+        radialCoef = 180 / Math.PI,
+        path = [];
+    path.push("M ", radius * Math.cos(angle), " ", radius * Math.sin(angle));
 
     for (var i = 0; i < n; i++) {
         angle += anglePiece;
-        path += "A " + toothWidth / 2 + " " + toothHight + " " +
-            ((angle - anglePiece / 2) * 180 / Math.PI + 90) + " 0 " + orientation + " "
-            + radius * Math.cos(angle) + " " + radius * Math.sin(angle);
+        path.push("A ", halfToothW, " ", toothHight, " ",
+            ((angle - halfAngleP) * radialCoef + 90), " 0 ", orientation,
+            " ", radius * Math.cos(angle), " ", radius * Math.sin(angle));
         angle += anglePiece;
-        path += "A " + radius + " " + radius + " 0 0 1 " +
-            + radius * Math.cos(angle) + " " + radius * Math.sin(angle);
+        path.push("A ", radius, " ", radius, " 0 0 1 ",
+            radius * Math.cos(angle), " ", radius * Math.sin(angle));
     }
 
-    path += "M 0 " + (-centerRadius);
-    path += "A " + centerRadius + " " + centerRadius + " 0 0 0 0 " + centerRadius;
-    path += "A " + centerRadius + " " + centerRadius + " 0 0 0 0 " + (-centerRadius);
-    return path;
+    path.push("M 0 ", -centerRadius);
+    path.push("A ", centerRadius, " ", centerRadius, " 0 0 0 0 ", centerRadius);
+    path.push("A ", centerRadius, " ", centerRadius, " 0 0 0 0 ", -centerRadius);
+    return path.join("");
 }
 
 function append(parent, tag) {
