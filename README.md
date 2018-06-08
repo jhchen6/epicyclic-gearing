@@ -1,16 +1,3 @@
 # epicyclic-gearing
-coding practice
 
-## inspiration
-
-https://bl.ocks.org/mbostock/1353700
-
-## result
-
-![result img](./img/epicyclic-gearing.png)
-
-## future work
-
-coordinate the gears
-
-now they appear coordinated just by chance. change the number of planets or other parameters like toothHeight, and you'll see them overlapping. 
+This is a coding practice following [Mike Bostock](https://bost.ocks.org/mike/)'s [Epicyclic Gearing](https://bl.ocks.org/mbostock/1353700) example.

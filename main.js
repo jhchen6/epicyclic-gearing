@@ -1,5 +1,3 @@
-$(document).ready(start);
-
 var toothWidth = 8,
     toothHight = 8,
     centerRadius = 10,
@@ -16,88 +14,81 @@ var sunRadius = numToothSun * toothWidth / Math.PI,
     outerRaius = annulusRadius + annulusThick;
 
 var rotateSpeedSun = 0.7,
-    rotateSpeedPlanet = - rotateSpeedSun / numToothPlanet * numToothSun,
-    rotateSpeedAnnulus = - rotateSpeedSun / numToothAnnulus * numToothSun,
+    rotateSpeedPlanet = -rotateSpeedSun / numToothPlanet * numToothSun,
+    rotateSpeedAnnulus = -rotateSpeedSun / numToothAnnulus * numToothSun,
+    rotateSpeedG,
     rotateSun = 0,
-    rotateG2 = 0,
+    rotateG = 0,
     rotatePlanet = 0,
-    rotateAnnulus = 0,
-    animationFrameID;
+    rotateAnnulus = 0;
 
-function start() {
-    var $svg = $("svg"),
-        svg = $svg[0],
-        width = +$svg.attr("width"),
-        height = +$svg.attr("height");
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
 
-    //paint
-    var $g1 = append(svg, "g")
-        .attr("transform", "translate(" + [width / 2, height / 2] + ")");
+//paint
+var g = svg.append("g")
+    .attr("transform", "translate(" + [width / 2, height / 2] + ")")
+    .append("g");
 
-    var $g2 = append($g1, "g");
+var annulus = g.append("g")
+    .attr("class", "annulus")
+    .append("path")
+    .datum({
+        n: numToothAnnulus,
+        r: outerRaius,
+        orientation: 0
+    })
+    .attr("d", gearPath);
 
-    var $gAnnulus = append($g2, "g")
-        .attr("class", "annulus");
-    var $annulus = append($gAnnulus, "path")
-        .attr("d", gearPath(numToothAnnulus, outerRaius, 0));
+var sun = g.append("g")
+    .attr("class", "sun")
+    .append("path")
+    .datum({
+        n: numToothSun,
+        r: centerRadius,
+        orientation: 1
+    })
+    .attr("d", gearPath);
 
-    var $gSun = append($g2, "g")
-        .attr("class", "sun");
-    var $sun = append($gSun, "path")
-        .attr("d", gearPath(numToothSun, centerRadius, 1));
+var angle = -Math.PI / 2,
+    anglePiece = Math.PI * 2 / numPlanet,
+    data = [];
 
-    var angle = -Math.PI / 2,
-        anglePiece = Math.PI * 2 / numPlanet,
-        planetPath = gearPath(numToothPlanet, centerRadius, 1);
-    for (var i = 0; i < numPlanet; i++) {
-        angle += anglePiece;
-        var $g = append($g2, "g")
-            .attr("class", "planet")
-            .attr("transform", "translate(" +
-                [revolutionRadius * Math.cos(angle),
-                revolutionRadius * Math.sin(angle)] + ")");
-        append($g, "path").attr("d", planetPath);
-    }
-
-    //animate
-    $("form").change(function (evt) {
-        evt.preventDefault();
-        cancelAnimationFrame(animationFrameID);
-        rotate($("input[name='reference']:checked").attr("id").substring(4));
+for (var i = 0; i < numPlanet; i++) {
+    angle += anglePiece;
+    data.push({
+        angle: angle,
+        n: numToothPlanet,
+        r: centerRadius,
+        orientation: 1
     });
-
-    rotate($("input[name='reference']:checked").attr("id").substring(4));
-
-    function rotate(reference) {
-        var rotateSpeedG2;
-        if (reference === "annulus") {
-            rotateSpeedG2 = -rotateSpeedAnnulus;
-        }
-        else if (reference === "planet") {
-            rotateSpeedG2 = 0;
-        }
-        else if (reference === "sun") {
-            rotateSpeedG2 = -rotateSpeedSun;
-        }
-
-        animationFrameID = requestAnimationFrame(loop);
-
-        function loop() {
-            rotateSun += rotateSpeedSun;
-            rotateG2 += rotateSpeedG2;
-            rotatePlanet += rotateSpeedPlanet;
-            rotateAnnulus += rotateSpeedAnnulus;
-            $sun.attr("transform", "rotate(" + rotateSun + ")");
-            $g2.attr("transform", "rotate(" + rotateG2 + ")");
-            $annulus.attr("transform", "rotate(" + rotateAnnulus + ")");
-            $(".planet path").attr("transform", "rotate(" + rotatePlanet + ")");
-
-            animationFrameID = requestAnimationFrame(loop);
-        }
-    }
 }
 
-function gearPath(n, centerRadius, orientation) {
+var planets = g.selectAll(".planet")
+    .data(data)
+    .enter().append("g")
+    .attr("class", "planet")
+    .attr("transform", d => "translate(" + [revolutionRadius * Math.cos(d.angle),
+        revolutionRadius * Math.sin(d.angle)
+    ] + ")")
+    .append("path").attr("d", gearPath);
+
+//animate
+d3.select("form").on("change", function () {
+    d3.event.preventDefault();
+    timer.stop();
+    setRotateSpeed();
+    timer.restart(rotate);
+});
+
+setRotateSpeed();
+var timer = d3.timer(rotate);
+
+function gearPath(d) {
+    var n = d.n,
+        centerRadius = d.r,
+        orientation = d.orientation;
     var radius = n * toothWidth / Math.PI,
         angle = 0,
         anglePiece = Math.PI / n,
@@ -123,8 +114,24 @@ function gearPath(n, centerRadius, orientation) {
     return path.join("");
 }
 
-function append(parent, tag) {
-    var elem = document.createElementNS("http://www.w3.org/2000/svg", tag);
-    $(parent).append(elem);
-    return $(elem);
+function setRotateSpeed() {
+    var reference = d3.select("input[name='reference']:checked").attr("id").substring(4);
+    if (reference === "annulus") {
+        rotateSpeedG = -rotateSpeedAnnulus;
+    } else if (reference === "planet") {
+        rotateSpeedG = 0;
+    } else if (reference === "sun") {
+        rotateSpeedG = -rotateSpeedSun;
+    }
+}
+
+function rotate() {
+    rotateSun += rotateSpeedSun;
+    rotateG += rotateSpeedG;
+    rotatePlanet += rotateSpeedPlanet;
+    rotateAnnulus += rotateSpeedAnnulus;
+    sun.attr("transform", "rotate(" + rotateSun + ")");
+    g.attr("transform", "rotate(" + rotateG + ")");
+    annulus.attr("transform", "rotate(" + rotateAnnulus + ")");
+    planets.attr("transform", "rotate(" + rotatePlanet + ")");
 }

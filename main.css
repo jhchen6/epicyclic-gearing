@@ -20,16 +20,14 @@ path {
     fill-rule: evenodd;
 }
 
-  .sun path {
+.sun path {
     fill: #6baed6;
-  }
-  
-  .planet path {
+}
+
+.planet path {
     fill: #9ecae1;
-  }
-  
-  .annulus path {
+}
+
+.annulus path {
     fill: #c6dbef;
-  }
-  
-  
+}
